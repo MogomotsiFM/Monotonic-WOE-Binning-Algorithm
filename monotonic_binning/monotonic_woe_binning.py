@@ -94,6 +94,7 @@ class Binning(BaseEstimator, TransformerMixin):
                         summary.loc[i, "nsamples"] = n
                         summary.loc[i, "means"] = m
                         summary.loc[i, "std_dev"] = s
+                        summary.loc[i, self.column] = summary.loc[j, self.column]
                         summary.loc[j, "del_flag"] = 1
 
                         j = j + 1
@@ -152,6 +153,9 @@ class Binning(BaseEstimator, TransformerMixin):
             row_delete = row_of_maxp + 1
 
             if max_p > self.p_threshold:
+                summary.loc[row_of_maxp, self.column] = summary.loc[
+                    row_delete, self.column
+                ]
                 summary = summary.drop(summary.index[row_delete])
                 summary = summary.reset_index(drop=True)
             else:
@@ -222,12 +226,12 @@ class Binning(BaseEstimator, TransformerMixin):
 
         if self.sign == False:
             self.woe_summary.loc[0, self.column + "_shift"] = -np.inf
-            self.bins = np.sort(list(self.woe_summary[self.column]) + [np.Inf, -np.Inf])
+            self.bins = np.sort(list(self.woe_summary[self.column]) + [np.inf, -np.inf])
         else:
             self.woe_summary.loc[len(self.woe_summary) - 1, self.column + "_shift"] = (
                 np.inf
             )
-            self.bins = np.sort(list(self.woe_summary[self.column]) + [np.Inf, -np.Inf])
+            self.bins = np.sort(list(self.woe_summary[self.column]) + [np.inf, -np.inf])
 
         self.woe_summary["labels"] = self.woe_summary.apply(
             self.generate_bin_labels, axis=1
